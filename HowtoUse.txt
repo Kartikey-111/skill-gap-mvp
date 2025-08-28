@@ -1,0 +1,40 @@
+How to Test Directly from GitHub
+
+Clone the repository
+
+git clone https://github.com/Kartikey-111/skill-gap-mvp.git
+cd skill-gap-mvp
+
+
+Create and activate a virtual environment
+
+python3 -m venv venv
+# macOS/Linux
+source venv/bin/activate
+# Windows PowerShell
+.\venv\Scripts\Activate.ps1
+
+
+Install dependencies
+
+pip install -r requirements.txt
+
+
+Start the FastAPI backend
+
+uvicorn main:app --reload --port 8080
+
+
+Open the frontend demo
+
+Open index.html in any browser.
+
+Paste a sample JSON payload (like the one in sample_payload.json).
+
+Click Submit to see the mastery vector, gaps, curriculum plan, and predictions in tables.
+
+Optional: Test via curl
+
+curl -s -X POST http://127.0.0.1:8080/diagnostics/generate \
+  -H "Content-Type: application/json" \
+  -d @sample_payload.json | jq .
