@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "assessment_id": "asst-001",
+  "student_id": "stu-001",
+  "locale": "en-US",
+  "responses": [
+    {
+      "item_id": "i1",
+      "type": "mcq",
+      "answer": "B",
+      "correct": "B",
+      "time_sec": 42,
+      "skill_refs": [
+        "skill:fractions.add"
+      ]
+    },
+    {
+      "item_id": "i2",
+      "type": "msq",
+      "answer": [
+        "A",
+        "C"
+      ],
+      "correct": [
+        "A",
+        "B",
+        "C"
+      ],
+      "time_sec": 60,
+      "skill_refs": [
+        "skill:fractions.add",
+        "skill:fractions.sub"
+      ]
+    },
+    {
+      "item_id": "i3",
+      "type": "numeric",
+      "answer": "3.14",
+      "correct": "3.14",
+      "time_sec": 30,
+      "skill_refs": [
+        "skill:math.pi"
+      ]
+    },
+    {
+      "item_id": "i4",
+      "type": "short",
+      "answer": "Photosynthesis uses sunlight",
+      "correct": "photosynthesis",
+      "time_sec": 22,
+      "skill_refs": [
+        "skill:bio.photosynthesis"
+      ]
+    }
+  ],
+  "timestamp": "2025-08-28T00:00:00Z"
+}

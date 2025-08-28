@@ -1,0 +1,12 @@
+body {
+    background-color: #f9f9f9;
+}
+
+.swagger-ui .topbar {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.swagger-ui .info {
+    font-family: 'Arial', sans-serif;
+}

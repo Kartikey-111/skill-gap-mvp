@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Skill Gap MVP Demo</title>
+    <style>
+        table { border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px 12px; text-align: left; }
+        th { background-color: #eee; }
+    </style>
+</head>
+<body>
+<h2>Skill Gap MVP Demo</h2>
+<textarea id="payload" rows="15" cols="80">
+{
+  "user_id": "user123",
+  "responses": [
+    {"question_id": "q1","answer": "A"},
+    {"question_id": "q2","answer": ["B","C"]}
+  ]
+}
+</textarea>
+<br><br>
+<button onclick="submitPayload()">Submit</button>
+
+<h3>Results:</h3>
+<div id="result"></div>
+
+<script>
+async function submitPayload() {
+    const raw = document.getElementById("payload").value;
+    let input;
+    try { input = JSON.parse(raw); } 
+    catch (e) { document.getElementById("result").innerText = "Invalid JSON!"; return; }
+
+    const backendPayload = {
+        schema_version: "1.0",
+        assessment_id: "assess_001",
+        student_id: input.user_id || "user123",
+        responses: (input.responses || []).map(r => ({
+            item_id: r.question_id,
+            type: Array.isArray(r.answer) ? "msq" : "mcq",
+            answer: r.answer,
+            correct: r.answer,
+            skill_refs: ["Skill_" + r.question_id]
+        }))
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/diagnostics/generate", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(backendPayload)
+        });
+        if(!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+        displayResults(data);
+    } catch (err) {
+        document.getElementById("result").innerText = "Error: " + err;
+    }
+}
+
+function displayResults(data) {
+    const container = document.getElementById("result");
+    container.innerHTML = "";
+
+    const content = data.main_response.content;
+
+    // Mastery Vector Table
+    if(content.mastery_vector) {
+        let html = "<h4>Mastery Vector</h4><table><tr><th>Skill</th><th>Score</th><th>Uncertainty</th></tr>";
+        content.mastery_vector.forEach(m => {
+            html += `<tr><td>${m.skill_id}</td><td>${m.score}</td><td>${m.uncertainty}</td></tr>`;
+        });
+        html += "</table>";
+        container.innerHTML += html;
+    }
+
+    // Gaps Table
+    if(content.gaps) {
+        let html = "<h4>Gaps</h4><table><tr><th>Skill</th><th>Severity</th></tr>";
+        content.gaps.forEach(g => {
+            html += `<tr><td>${g.skill_id}</td><td>${g.severity}</td></tr>`;
+        });
+        html += "</table>";
+        container.innerHTML += html;
+    }
+
+    // Curriculum Plan Table
+    if(content.curriculum_plan) {
+        let plan = content.curriculum_plan;
+        if(plan.objectives) {
+            let html = "<h4>Curriculum Objectives</h4><table><tr><th>ID</th><th>Skill</th><th>Target Score</th></tr>";
+            plan.objectives.forEach(o => {
+                html += `<tr><td>${o.id}</td><td>${o.skill_id}</td><td>${o.target_score}</td></tr>`;
+            });
+            html += "</table>";
+            container.innerHTML += html;
+        }
+        if(plan.activities) {
+            let html = "<h4>Curriculum Activities</h4><table><tr><th>ID</th><th>Label</th><th>Minutes</th><th>Skill Refs</th></tr>";
+            plan.activities.forEach(a => {
+                html += `<tr><td>${a.id}</td><td>${a.label}</td><td>${a.estimated_minutes}</td><td>${a.skill_refs.join(", ")}</td></tr>`;
+            });
+            html += "</table>";
+            container.innerHTML += html;
+        }
+    }
+
+    // Predictions
+    if(content.predictions) {
+        let html = "<h4>Predictions</h4><table><tr><th>Subject</th><th>Horizon (days)</th><th>Prob Pass</th><th>Band</th></tr>";
+        content.predictions.forEach(p => {
+            html += `<tr><td>${p.subject}</td><td>${p.horizon_days}</td><td>${p.prob_pass}</td><td>${p.band}</td></tr>`;
+        });
+        html += "</table>";
+        container.innerHTML += html;
+    }
+}
+</script>
+</body>
+</html>
